@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basic Keyword Search Engine — Stage 1</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Navigation / Hero Header -->
+    <header class="hero-header">
+      <div class="header-content">
+        <div class="badge-tag">RAG Fundamentals Series • Part 1</div>
+        <h1>Basic Keyword Search Engine</h1>
+        
+      </div>
+    </header>
+
+    <!-- Search Section -->
+    <section class="search-card">
+      <div class="search-box-wrapper">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="queryInput" 
+          class="search-input" 
+          placeholder="Type a search query (e.g. How to make pizza without an oven)..." 
+          value="How to make pizza without an oven"
+          autocomplete="off"
+        />
+        <button id="clearBtn" class="clear-btn" title="Clear query">✕</button>
+      </div>
+
+      <!-- Quick Test Sample Queries -->
+      <div class="sample-queries">
+        <span class="sample-label">Try sample queries:</span>
+        <button class="chip" data-query="How to make pizza without an oven">🍕 Pizza without oven</button>
+        <button class="chip" data-query="Chocolate cake at home">🍫 Chocolate cake</button>
+        <button class="chip" data-query="delicious pasta with vegetables">🍝 Cooking pasta</button>
+        <button class="chip" data-query="shoes and boots">👟 Zero match query</button>
+      </div>
+    </section>
+
+    <!-- Step-by-Step Pipeline Visualizer -->
+    <section class="pipeline-section">
+      <div class="section-title-wrap">
+        <h2>Under the Hood: Execution Pipeline</h2>
+        <span class="step-indicator">4 Stages Active</span>
+      </div>
+
+      <!-- Step 1: Tokenization -->
+      <div class="pipeline-step-card" id="step1Card">
+        <div class="step-header">
+          <div class="step-number">Step 1</div>
+          <div class="step-info">
+            <h3>Tokenization & Normalization</h3>
+            <p>Lowercase the query, strip punctuation with regex <code>/[^\w\s]/g</code>, and split by whitespace <code>/\s+/</code> into discrete keywords.</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="tokens-flow">
+            <div class="flow-box">
+              <span class="flow-label">Raw Query:</span>
+              <span class="flow-value code-font" id="rawQueryDisplay">"How to make pizza without an oven"</span>
+            </div>
+            <span class="flow-arrow">➔</span>
+            <div class="flow-box">
+              <span class="flow-label">Extracted Keywords (<span id="tokenCount">0</span> tokens):</span>
+              <div class="token-chips" id="tokenChipsList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Document Scanning & Scoring -->
+      <div class="pipeline-step-card" id="step2Card">
+        <div class="step-header">
+          <div class="step-number">Step 2</div>
+          <div class="step-info">
+            <h3>Corpus Scanning & Score Calculation</h3>
+            <p>Iterate over every document in the database, check keyword containment in <code>title + content</code>, and increment <code>score++</code> for each match.</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="corpus-grid" id="corpusScanGrid">
+            <!-- Dynamically populated document scan cards -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Filtering & Sorting (Ranking) -->
+      <div class="pipeline-step-card" id="step3Card">
+        <div class="step-header">
+          <div class="step-number">Step 3</div>
+          <div class="step-info">
+            <h3>Filtering & Ranking</h3>
+            <p>Discard documents with zero matches (<code>score > 0</code>) and sort the remaining documents in descending order (<code>b.score - a.score</code>).</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="filtering-visual" id="filteringVisual">
+            <!-- Filter & Sort status visual -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Final Ranked Output -->
+      <div class="pipeline-step-card" id="step4Card">
+        <div class="step-header">
+          <div class="step-number">Step 4</div>
+          <div class="step-info">
+            <h3>Final Ranked Search Results</h3>
+            <p>Clean retriever output ready for downstream consumption (such as feeding into an LLM context in a RAG pipeline).</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <div id="finalResultsContainer" class="results-container">
+            <!-- Dynamically populated final ranked cards -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: What's the Problem in This? / Limitations -->
+    <section class="limitations-section">
+      <div class="limitations-header">
+        <div class="warning-badge">⚠️ Critical Analysis</div>
+        <h2>What's the Problem in This? (Limitations of Basic Keyword Search)</h2>
+        <p class="limitations-desc">
+          While this basic search engine works for exact word matches, it has severe limitations when used in production or real-world Retrieval-Augmented Generation (RAG) systems. Here are the core problems and why we need more advanced techniques:
+        </p>
+      </div>
+
+      <div class="problems-grid">
+        <!-- Problem 1 -->
+        <div class="problem-card">
+          <div class="problem-icon">🚫</div>
+          <div class="problem-title">1. Stop Words Domination</div>
+          <p class="problem-text">
+            Common grammatical words like <em>"how"</em>, <em>"to"</em>, <em>"an"</em>, <em>"the"</em> are treated with the exact same importance as high-value intent words like <em>"pizza"</em> or <em>"oven"</em>.
+          </p>
+          <div class="problem-example">
+            <strong>Flaw in action:</strong> Searching <code>"how to"</code> matches every document equally without expressing any meaningful user intent.
+          </div>
+          <button class="test-flaw-btn" data-query="how to">⚡ Test This Flaw (Query: "how to")</button>
+        </div>
+
+        <!-- Problem 2 -->
+        <div class="problem-card">
+          <div class="problem-icon">📊</div>
+          <div class="problem-title">2. Frequency & Length Blindness</div>
+          <p class="problem-text">
+            The engine only checks if a keyword exists (binary presence). A document mentioning a word 10 times gets the same score (+1) as a document mentioning it once. Document length is also ignored.
+          </p>
+          <div class="problem-example">
+            <strong>Missing:</strong> Term Frequency (TF) and Inverse Document Frequency (IDF) weighting algorithms like <strong>BM25</strong>.
+          </div>
+        </div>
+
+        <!-- Problem 3 -->
+        <div class="problem-card">
+          <div class="problem-icon">🧠</div>
+          <div class="problem-title">3. Vocabulary Mismatch (Zero Semantics)</div>
+          <p class="problem-text">
+            It cannot understand synonyms, misspellings, or semantic meaning. If the user searches using different words with the same meaning, search completely fails (0 results).
+          </p>
+          <div class="problem-example">
+            <strong>Flaw in action:</strong> Searching <code>"baking chocolate pastry"</code> returns 0 results even though the database contains <em>"Chocolate Cake"</em>!
+          </div>
+          <button class="test-flaw-btn" data-query="baking chocolate pastry">⚡ Test This Flaw (Query: "baking chocolate pastry")</button>
+        </div>
+
+        <!-- Problem 4 -->
+        <div class="problem-card">
+          <div class="problem-icon">🔍</div>
+          <div class="problem-title">4. Substring False Positives</div>
+          <p class="problem-text">
+            Using JavaScript <code>includes(word)</code> matches substrings inside unrelated words. For example, the token <code>"an"</code> matches inside <code>"pan"</code> or <code>"ingredients"</code>.
+          </p>
+          <div class="problem-example">
+            <strong>Flaw in action:</strong> Searching short tokens matches unintended words inside the text body.
+          </div>
+          <button class="test-flaw-btn" data-query="an">⚡ Test This Flaw (Query: "an")</button>
+        </div>
+      </div>
+
+      <!-- Roadmap to Advanced Search / RAG -->
+      <div class="roadmap-card">
+        <h3>🚀 The Journey Towards Advanced Search & RAG</h3>
+        <p>To fix these limitations, modern search and RAG systems evolve through these milestones:</p>
+        <div class="roadmap-steps">
+          <div class="roadmap-step current">
+            <span class="step-badge">Stage 1 (Current)</span>
+            <h4>Naive Keyword Match</h4>
+            <p>Direct token containment & count scoring.</p>
+          </div>
+          <div class="roadmap-step next">
+            <span class="step-badge">Stage 2 (Next)</span>
+            <h4>Stop Words & Stemming</h4>
+            <p>Filter filler words & reduce words to root stems (Porter Stemmer).</p>
+          </div>
+          <div class="roadmap-step next">
+            <span class="step-badge">Stage 3</span>
+            <h4>TF-IDF / BM25</h4>
+            <p>Rarity weighting (IDF) and term frequency saturation.</p>
+          </div>
+          <div class="roadmap-step next">
+            <span class="step-badge">Stage 4</span>
+            <h4>Dense Vector Embeddings</h4>
+            <p>Semantic vector search (Cosine similarity) capturing concepts & meaning.</p>
+          </div>
+          <div class="roadmap-step next">
+            <span class="step-badge">Stage 5 (Production RAG)</span>
+            <h4>Hybrid Search + Reranker</h4>
+            <p>Combine BM25 + Dense Vectors + Cross-Encoder reranking.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Corpus Inspector & Add Document Section -->
+    <section class="corpus-section">
+      <div class="corpus-header">
+        <div>
+          <h2>Document Database (Corpus)</h2>
+          <p>The active collection of documents searched by the engine.</p>
+        </div>
+        <div class="corpus-actions">
+          <button id="addDocBtn" class="btn btn-primary">+ Add Custom Document</button>
+          <button id="resetDocsBtn" class="btn btn-secondary">↺ Reset to Defaults</button>
+        </div>
+      </div>
+
+      <!-- Add Document Form (Collapsible) -->
+      <div id="addDocForm" class="add-doc-form hidden">
+        <h3>Add New Document to Corpus</h3>
+        <div class="form-group">
+          <label for="newDocTitle">Document Title:</label>
+          <input type="text" id="newDocTitle" placeholder="e.g. Italian Pizza Dough" />
+        </div>
+        <div class="form-group">
+          <label for="newDocContent">Document Content:</label>
+          <textarea id="newDocContent" rows="3" placeholder="e.g. Step by step recipe to prepare authentic crust at home."></textarea>
+        </div>
+        <div class="form-buttons">
+          <button id="saveDocBtn" class="btn btn-success">Save Document</button>
+          <button id="cancelDocBtn" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+
+      <div class="documents-list-grid" id="documentsListGrid">
+        <!-- Rendered list of documents in corpus -->
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Built with vanilla JavaScript & Node.js • Part of the <strong>RAG & Information Retrieval Masterclass</strong></p>
+      <div class="footer-links">
+        <span>Terminal Mode: <code>node index.js</code></span>
+        <span>•</span>
+        <span>Frontend Server: <code>npm start</code></span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Include search engine logic directly so it runs offline in any browser or with server -->
+  <script src="../documents.js"></script>
+  <script src="../src/search.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

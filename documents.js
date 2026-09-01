@@ -21,4 +21,10 @@ const documents = [
   }
 ];
 
-module.exports = documents;
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = documents;
+}
+if (typeof window !== "undefined") {
+  window.defaultDocuments = documents;
+}
+
