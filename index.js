@@ -1,30 +1,14 @@
 const documents = require("./documents");
-const { tokenize } = require("./src/search");
+const {searchDocuments} = require("./src/search");  
 const query = "How to make pizza without an oven";
 
-// Convert the query into keywords
-const keywords = tokenize(query);
-console.log("Keywords:", keywords);
+const results = searchDocuments(query, documents);
+console.log(`\nSearch Query: ${query}\n`)
 
-// search every document
-
-const results = documents.map((document) => {
-const text = document.content.toLowerCase();
- let score = 0;
- keywords.forEach((keyword) => {
-  if (text.includes(keyword)) {
-    score ++;
-  }
- })
-return {
-  ...document,
-  score
-}
-
-})
-results.sort((a, b) => b.score - a.score);
-console.log("\nSearch Results:\n");
-results.forEach((result) => {
-console.log(`Score: ${result.score} | ${result.title}`)
-})
-
+results.forEach((result, index) => {
+console.log(`${index + 1}, ${result.title}`);
+console.log(`Title: ${result.title}`);
+console.log(`Score: ${result.score}`);
+console.log(`Matched words: ${result.matchedWords.join(", ")}`);
+console.log();
+});
