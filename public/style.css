@@ -253,7 +253,7 @@ code {
 .step-indicator {
   font-size: 0.82rem;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--palette-sky-light) 0%, var(--palette-sky-blue) 100%);
+  background: var(--palette-lavender);
   color: var(--text-navy);
   padding: 0.3rem 0.85rem;
   border-radius: var(--radius-full);
@@ -283,7 +283,7 @@ code {
 }
 
 .step-number {
-  background: linear-gradient(135deg, var(--palette-lavender) 0%, var(--palette-sky-blue) 100%);
+  background: var(--palette-sky-blue);
   color: var(--text-navy);
   font-weight: 800;
   font-size: 0.85rem;
@@ -352,7 +352,7 @@ code {
 }
 
 .token-badge {
-  background: linear-gradient(135deg, rgba(197, 173, 237, 0.25) 0%, rgba(248, 171, 235, 0.2) 100%);
+  background: var(--bg-card-alt);
   color: var(--text-navy);
   border: 1.5px solid var(--palette-lavender);
   font-family: 'Fira Code', monospace;
