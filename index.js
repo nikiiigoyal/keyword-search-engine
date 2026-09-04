@@ -1,6 +1,6 @@
 const documents = require("./documents");
 const {searchDocuments} = require("./src/search");  
-const query = "How to make pizza without an oven";
+const query = "pizza pizza";
 
 const results = searchDocuments(query, documents);
 console.log(`\nSearch Query: ${query}\n`)

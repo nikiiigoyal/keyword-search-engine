@@ -8,6 +8,14 @@ function tokenize(text) {
     .split(/\s+/)
     .filter((word) => word.length > 0);
 }
+function countOccurrences(text, word) {
+  const words = tokenize(text);
+
+  return words.filter(
+    (currentWord) => currentWord === word
+  ).length;
+}
+
 
 // search every doc.
 function searchDocuments(query, documents) {
@@ -21,12 +29,24 @@ function searchDocuments(query, documents) {
     const matchedWords = [];
 
     queryWords.forEach((word) => {
-      if (documentText.includes(word)) {
-        score++;
-        matchedWords.push(word);
+      // // Does the word exixt
+      // if (documentText.includes(word)) {
+      //   score++;
+      //   matchedWords.push(word);
+      // }
+      // Now we want to count the occurrences of the word
+      
+ const frequency = countOccurrences(documentText, word);
+
+      if (frequency > 0) {
+        score += frequency;
+
+        matchedWords.push({
+          word,
+          frequency
+        });
       }
     });
-
     return {
       ...document,
       score,
@@ -39,21 +59,31 @@ function searchDocuments(query, documents) {
     .sort((a, b) => b.score - a.score);
 }
 
+
 // Detailed step-by-step search pipeline for interactive UI and visualizer
 function detailedSearch(query, documents) {
   const cleanQuery = query ? query.trim() : "";
-  const queryWords = tokenize(cleanQuery);
+
+  // Tokenize query and remove duplicate words
+  const queryWords = [...new Set(tokenize(cleanQuery))];
 
   const scannedDocs = documents.map((doc) => {
-    const documentText = `${doc.title} ${doc.content}`.toLowerCase();
+    const documentText = `${doc.title} ${doc.content}`;
+
     const matchedWords = [];
     const unmatchedWords = [];
     let score = 0;
 
     queryWords.forEach((word) => {
-      if (documentText.includes(word)) {
-        score++;
-        matchedWords.push(word);
+      const frequency = countOccurrences(documentText, word);
+
+      if (frequency > 0) {
+        score += frequency;
+
+        matchedWords.push({
+          word,
+          frequency
+        });
       } else {
         unmatchedWords.push(word);
       }
@@ -68,8 +98,13 @@ function detailedSearch(query, documents) {
     };
   });
 
-  const filteredDocs = scannedDocs.filter((result) => result.score > 0);
-  const rankedResults = [...filteredDocs].sort((a, b) => b.score - a.score);
+  const filteredDocs = scannedDocs.filter(
+    (result) => result.score > 0
+  );
+
+  const rankedResults = [...filteredDocs].sort(
+    (a, b) => b.score - a.score
+  );
 
   return {
     rawQuery: query,
@@ -80,11 +115,15 @@ function detailedSearch(query, documents) {
   };
 }
 
+
 // Universal export for Node.js (CommonJS) and Browser
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { tokenize, searchDocuments, detailedSearch };
-}
+  module.exports = { tokenize, searchDocuments, detailedSearch , countOccurrences
+
+  } };
+
 if (typeof window !== "undefined") {
   window.SearchEngine = { tokenize, searchDocuments, detailedSearch };
 }
+
 
